@@ -35,7 +35,11 @@ match (Predicado n1 t1) (Predicado n2 t2)
 -- bug? se o primeiro elemento da lista de termos for uma variável o match não
 -- trata os outros termos
 matchTermos :: [Termo] -> [Termo] -> [Ligacao] -> Maybe [Ligacao]
-matchTermos ((Variavel v1):_) (h2:_) ls = matchVariavel (Variavel v1) h2 ls  -- O 1º elemento de 1ª lista é uma variável
+matchTermos [] [] ls = Just ls
+matchTermos ((Variavel v1):t1) (h2:t2) ls = 
+    case ls2 of Nothing -> Nothing
+                Just ls3 -> matchTermos t1 t2 ls3
+    where ls2 = matchVariavel (Variavel v1) h2 ls                            -- O 1º elemento de 1ª lista é uma variável
 matchTermos (h1:[]) (h2:[]) ls = matchAtomos h1 h2 ls                        -- Cada lista de temos tem apenas um atomo
 matchTermos (h1:t1) (h2:t2) ls =
     case matchPrimeiros of Nothing -> Nothing
