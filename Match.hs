@@ -49,6 +49,6 @@ matchAtomos a1 a2 ls = if a1 == a2 then Just ls else Nothing
 
 matchVariavel :: Termo -> Termo -> [Ligacao] -> Maybe [Ligacao]
 matchVariavel (Variavel v1) (Constante c1) ls =
-    case ligacao of Just (v2, c2) -> matchTermos [(Constante c2)] [(Constante c1)] ls
-                    Nothing -> Just (adicionaLigacao v1 c1 ls)
-    where ligacao = encontraLigacao v1 ls
+    case encontraLigacao v1 ls of
+        Just (v2, c2) -> matchTermos [(Constante c2)] [(Constante c1)] ls
+        Nothing -> Just (adicionaLigacao v1 c1 ls)
