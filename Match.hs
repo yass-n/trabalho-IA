@@ -39,10 +39,10 @@ match (Predicado n1 t1) (Predicado n2 t2)
 matchTermos :: [Termo] -> [Termo] -> [Ligacao] -> Maybe [Ligacao]
 matchTermos [] [] ls = Just ls
 matchTermos ((Variavel v1):t1) (h2:t2) ls =                                  -- O 1º elemento de 1ª lista é uma variável
-    matchVariavel (Variavel v1) h2 ls >>= (\ls2 -> matchTermos t1 t2 ls2)
+    matchVariavel (Variavel v1) h2 ls >>= matchTermos t1 t2
 matchTermos (h1:[]) (h2:[]) ls = matchAtomos h1 h2 ls                        -- Cada lista de temos tem apenas um atomo
 matchTermos (h1:t1) (h2:t2) ls =
-    matchTermos [h1] [h2] ls >>= (\ls2 -> matchTermos t1 t2 ls2)
+    matchTermos [h1] [h2] ls >>= matchTermos t1 t2
 
 matchAtomos :: Termo -> Termo -> [Ligacao] -> Maybe [Ligacao]
 matchAtomos a1 a2 ls = if a1 == a2 then Just ls else Nothing
