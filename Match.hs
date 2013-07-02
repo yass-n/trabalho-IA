@@ -27,9 +27,7 @@ adicionaLigacao v c ls = (v,c):ls
 encontraLigacao :: Variavel -> [Ligacao] -> Maybe Ligacao
 encontraLigacao v [] = Nothing
 encontraLigacao '_' _ = Nothing
-encontraLigacao v1 ((v2, c):t)
-	| v1 == v2 = Just (v2, c)
-	| otherwise = encontraLigacao v1 t
+encontraLigacao v1 ((v2, c):t) = if v1 == v2 then Just (v2, c) else encontraLigacao v1 t
 
 -- Match os termos de dois predicados se tiverem o mesmo nome, caso contrário Nothing
 match :: Predicado -> Predicado -> Maybe [Ligacao]
@@ -47,9 +45,7 @@ matchTermos (h1:t1) (h2:t2) ls =
     matchTermos [h1] [h2] ls >>= (\ls2 -> matchTermos t1 t2 ls2)
 
 matchAtomos :: Termo -> Termo -> [Ligacao] -> Maybe [Ligacao]
-matchAtomos a1 a2 ls
-    | a1 == a2 = Just ls
-    | otherwise  = Nothing
+matchAtomos a1 a2 ls = if a1 == a2 then Just ls else Nothing
 
 matchVariavel :: Termo -> Termo -> [Ligacao] -> Maybe [Ligacao]
 matchVariavel (Variavel v1) (Constante c1) ls =
