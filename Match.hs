@@ -1,3 +1,9 @@
+module Match
+( match
+, Termo(..)
+, Predicado(..)
+) where
+
 type Variavel = Char
 
 type Constante = String
@@ -36,15 +42,11 @@ match (Predicado n1 t1) (Predicado n2 t2)
 -- trata os outros termos
 matchTermos :: [Termo] -> [Termo] -> [Ligacao] -> Maybe [Ligacao]
 matchTermos [] [] ls = Just ls
-matchTermos ((Variavel v1):t1) (h2:t2) ls = 
-    case ls2 of Nothing -> Nothing
-                Just ls3 -> matchTermos t1 t2 ls3
-    where ls2 = matchVariavel (Variavel v1) h2 ls                            -- O 1º elemento de 1ª lista é uma variável
+matchTermos ((Variavel v1):t1) (h2:t2) ls =                                  -- O 1º elemento de 1ª lista é uma variável
+    matchVariavel (Variavel v1) h2 ls >>= (\ls2 -> matchTermos t1 t2 ls2)
 matchTermos (h1:[]) (h2:[]) ls = matchAtomos h1 h2 ls                        -- Cada lista de temos tem apenas um atomo
 matchTermos (h1:t1) (h2:t2) ls =
-    case matchPrimeiros of Nothing -> Nothing
-                           Just ls2 -> matchTermos t1 t2 ls2
-    where matchPrimeiros = matchTermos [h1] [h2] ls
+    matchTermos [h1] [h2] ls >>= (\ls2 -> matchTermos t1 t2 ls2)
 
 matchAtomos :: Termo -> Termo -> [Ligacao] -> Maybe [Ligacao]
 matchAtomos a1 a2 ls
