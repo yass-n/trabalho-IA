@@ -38,8 +38,6 @@ match (Predicado n1 t1) (Predicado n2 t2)
     | otherwise = Nothing
 
 -- Match os termos de dois predicados
--- bug? se o primeiro elemento da lista de termos for uma variável o match não
--- trata os outros termos
 matchTermos :: [Termo] -> [Termo] -> [Ligacao] -> Maybe [Ligacao]
 matchTermos [] [] ls = Just ls
 matchTermos ((Variavel v1):t1) (h2:t2) ls =                                  -- O 1º elemento de 1ª lista é uma variável
