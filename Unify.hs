@@ -30,3 +30,9 @@ unifyVariavel (Variavel v1) c1 ls =
 	case encontraLigacao v1 ls of 
 		Just (Ligacao v2 c2) -> unifyTermos [c2] [c1] ls
 		Nothing -> dentro (Variavel v1) c1 ls
+
+
+dentro :: Termo -> Termo -> [Lig2] -> Maybe [Lig2]
+dentro v1 v2 ls
+	| v1 == v2 = Nothing
+	| otherwise = Nothing
