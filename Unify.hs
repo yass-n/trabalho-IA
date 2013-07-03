@@ -36,3 +36,4 @@ dentro :: Termo -> Termo -> [Lig2] -> Maybe [Lig2]
 dentro v1 v2 ls
 	| v1 == v2 = Nothing
 	| otherwise = Nothing
+	
