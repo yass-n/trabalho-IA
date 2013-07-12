@@ -14,7 +14,7 @@ main = do
     let orange = Atomo "orange"
     let color = Atomo "color"
 
-    let p1 = color `Seq` x `Seq` red
+    let p1 = Seq color (Seq x red)
     let p2 = color `Seq` apple `Seq` red
     let p3 = color `Seq` apple `Seq`  y
     let p4 = color `Seq` x `Seq` y
