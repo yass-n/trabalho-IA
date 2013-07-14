@@ -1,5 +1,6 @@
 import Tipos
 import Match
+import Unify
 
 main:: IO ()
 main = do
@@ -44,6 +45,22 @@ main = do
 
 
     mapM_ testa [t1, t2, t3, t4, t5, t6, t7, t8, t9]
+
+    putStrLn "teste do unify"
+
+    -- x `Seq` (with `Seq` (hair `Seq` blond))
+    let p11 =  Seq x (Seq with (Seq hair blond))
+    -- (patrick `Seq` is_a `Seq` person) `Seq` (with `Seq` (hair `Seq` blond))
+    let p12 = Seq (Seq (Seq patrick is_a) person) (Seq with (Seq hair blond))
+
+    let p13 = Seq (Seq (Seq patrick is_a) y) (Seq with (Seq hair blond))
+    let p14 = Seq (Seq (Seq patrick is_a) x) (Seq with (Seq hair blond))
+
+    let t10 = unify p11 p12 [] == Just [(x, Seq (Seq patrick is_a) person)]
+    let t11 = unify p11 p13 [] == Just [(x, Seq (Seq patrick is_a) y)]
+    let t12 = unify p11 p14 [] == Nothing
+
+    mapM_ testa [t10, t11, t12]
 
 testa :: Bool -> IO ()
 testa t = do

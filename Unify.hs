@@ -2,21 +2,40 @@ module Unify where
 
 import Tipos
 
-unify :: Expression String -> Expression String -> [Ligacao String] -> Maybe ([Ligacao String])
+unify :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
 unify (Variavel "_") _ ligacoes = Just ligacoes
+
+unify (Atomo p) (Seq _ _) _ = Nothing
 
 unify (Atomo p) (Atomo d) ligacoes = if p == d then Just ligacoes else Nothing
 
-unify (Variavel p) d ligacoes = unify_variable p d ligacoes
+unify (Variavel p) d ligacoes = unifyVariable (Variavel p) d ligacoes
 
-unify p (Variavel d) ligacoes = unify_variable d p ligacoes
+unify p (Variavel d) ligacoes = unifyVariable (Variavel d) p ligacoes
 
-unify (Seq firstP restP) (Seq firstD restD) ligacoes = 
+unify (Seq firstP restP) (Seq firstD restD) ligacoes =
 	unify firstP firstD ligacoes >>= unify restP restD
 
-
-unify_variable :: Expression String -> Expression String -> [Ligacao String] -> Maybe ([Ligacao String])
-unify_variable (Variavel p) d ligacoes = 
+unifyVariable :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
+unifyVariable (Variavel p) d ligacoes =
 	case axaLigacao (Variavel p) ligacoes of
-		Just (p,b) -> unify b d ligacoes
-		Nothing -> if insidep p d ligacoes then Nothing else Just (addLigacao (Variavel p) d ligacoes)
+		Just (p, b) -> unify b d ligacoes
+		Nothing -> if insideP (Variavel p) d ligacoes then Nothing else Just ls
+    where ls = addLigacao (Variavel p) d ligacoes
+
+
+insideP :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Bool
+insideP v e ls = if v == e then True else insideOrEqualP v e ls
+
+insideOrEqualP :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Bool
+insideOrEqualP (Variavel v1) (Variavel v2) _ = v1 == v2
+
+insideOrEqualP _ (Atomo e) _ = False
+
+insideOrEqualP (Variavel v1) (Seq (Variavel v2) rest) ls =
+    case axaLigacao (Variavel v2) ls of
+        Just (_, b) -> insideOrEqualP (Variavel v1) b ls
+        Nothing -> insideOrEqualP (Variavel v1) (Variavel v2) ls
+
+insideOrEqualP v (Seq first rest) ls =
+    (insideOrEqualP v first ls) || (insideOrEqualP v rest ls)
