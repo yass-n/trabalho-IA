@@ -2,6 +2,28 @@ module Unify where
 
 import Tipos
 
+unify :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
+unify (Variavel "_") _ ligacoes = Just ligacoes
+
+unify (Atomo p) (Seq _ _) _ = Nothing
+
+unify (Atomo p) (Atomo d) ligacoes = if p == d then Just ligacoes else Nothing
+
+unify (Variavel p) d ligacoes = unifyVariable (Variavel p) d ligacoes
+
+unify p (Variavel d) ligacoes = unifyVariable (Variavel d) p ligacoes
+
+unify (Seq firstP restP) (Seq firstD restD) ligacoes =
+	unify firstP firstD ligacoes >>= unify restP restD
+
+unifyVariable :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
+unifyVariable (Variavel p) d ligacoes =
+	case axaLigacao (Variavel p) ligacoes of
+		Just (p, b) -> unify b d ligacoes
+		Nothing -> if insideP (Variavel p) d ligacoes then Nothing else Just ls
+    where ls = addLigacao (Variavel p) d ligacoes
+
+
 insideP :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Bool
 insideP v e ls = if v == e then True else insideOrEqualP v e ls
 
@@ -12,7 +34,7 @@ insideOrEqualP _ (Atomo e) _ = False
 
 insideOrEqualP (Variavel v1) (Seq (Variavel v2) rest) ls =
     case axaLigacao (Variavel v2) ls of
-        Just (e1, e2) -> insideOrEqualP (Variavel v1) e2 ls
+        Just (_, b) -> insideOrEqualP (Variavel v1) b ls
         Nothing -> insideOrEqualP (Variavel v1) (Variavel v2) ls
 
 insideOrEqualP v (Seq first rest) ls =
