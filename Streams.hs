@@ -1,6 +1,6 @@
 module Stream where
 
-data ObjectStream a = EmptyStream | Object a | Stream (ObjectStream a) (ObjectStream a) deriving (Show, Read, Eq)
+data ObjectStream a = EmptyStream | Object a | Stream (ObjectStream a) (ObjectStream a) | NIL deriving (Show, Read, Eq)
 
 {-
 	EXEMPLOS DE USO:
@@ -48,16 +48,18 @@ streamMember objeto stream
 	| objeto == (streamFirst stream) = True
 	| otherwise = streamMember objeto (streamRestp stream)
 
-streamRemember :: ObjectStream a -> ObjectStream a -> ObjectStream a
-streamRemember objeto variavel = undefined
+streamRemember :: (Eq a) => ObjectStream a -> ObjectStream a -> ObjectStream a
+streamRemember objeto variavel = 
+	if not (streamMember objeto variavel) then streamAppend variavel (streamCons objeto EmptyStream)
+	else NIL
 
 
 {-------------------------------------------------------------------------------}
 
 --Esta funcao foi criada para testar streamTranform
-tira_primeira_letra :: ObjectStream String -> ObjectStream String
-tira_primeira_letra (Object (h:t)) = (Object t)
+tiraPrimeiraLetra :: ObjectStream String -> ObjectStream String
+tiraPrimeiraLetra (Object (h:t)) = (Object t)
 
 --Funcao criada para testar streamTranform como exemplo do livro
-potencia_de_dois :: ObjectStream Integer -> ObjectStream Integer
-potencia_de_dois (Object num) = (Object (2^num))
+potenciaDeDois :: ObjectStream Integer -> ObjectStream Integer
+potenciaDeDois (Object num) = (Object (2^num))
