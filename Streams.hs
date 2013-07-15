@@ -36,11 +36,11 @@ stream_concatenate streams
 								(stream_concatenate (stream_cons (stream_rest (stream_first streams))
 													(stream_rest streams)))
 
-{-stream_transform :: (b -> a) -> ObjectStream a -> ObjectStream a
+stream_transform :: (ObjectStream a -> ObjectStream a) -> ObjectStream a -> ObjectStream a
 stream_transform procedure stream =
 	if (stream_endp stream) then EmptyStream
 	else stream_cons (procedure (stream_first stream))
-						(stream_transform (procedure) (stream_rest stream))-}
+						(stream_transform (procedure) (stream_rest stream))
 
 stream_member :: (Eq a) => ObjectStream a -> ObjectStream a -> Bool
 stream_member objeto stream
@@ -48,5 +48,9 @@ stream_member objeto stream
 	| objeto == (stream_first stream) = True
 	| otherwise = stream_member objeto (stream_rest stream)
 
-{- stream_remember :: ObjectStream a -> ObjectStream a -> ObjectStream a
-stream_remember objeto variavel = undefined -}
+{-stream_remember :: ObjectStream a -> ObjectStream a -> ObjectStream a
+stream_remember objeto variavel = undefined-}
+
+--Esta funcao foi criada para testar stream_transform
+tira_primeira_letra :: ObjectStream String -> ObjectStream String
+tira_primeira_letra (Object (h:t)) = (Object t)
