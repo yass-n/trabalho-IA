@@ -54,3 +54,7 @@ stream_remember objeto variavel = undefined-}
 --Esta funcao foi criada para testar stream_transform
 tira_primeira_letra :: ObjectStream String -> ObjectStream String
 tira_primeira_letra (Object (h:t)) = (Object t)
+
+--Funcao criada para testar stream_transform como exemplo do livro
+potencia_de_dois :: ObjectStream Integer -> ObjectStream Integer
+potencia_de_dois (Object num) = (Object (2^num))
