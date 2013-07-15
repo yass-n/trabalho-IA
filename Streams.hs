@@ -35,3 +35,18 @@ stream_concatenate streams
 	| otherwise = stream_cons (stream_first (stream_first streams)) 
 								(stream_concatenate (stream_cons (stream_rest (stream_first streams))
 													(stream_rest streams)))
+
+{-stream_transform :: (b -> a) -> ObjectStream a -> ObjectStream a
+stream_transform procedure stream =
+	if (stream_endp stream) then EmptyStream
+	else stream_cons (procedure (stream_first stream))
+						(stream_transform (procedure) (stream_rest stream))-}
+
+stream_member :: (Eq a) => ObjectStream a -> ObjectStream a -> Bool
+stream_member objeto stream
+	| stream_endp stream = False
+	| objeto == (stream_first stream) = True
+	| otherwise = stream_member objeto (stream_rest stream)
+
+{- stream_remember :: ObjectStream a -> ObjectStream a -> ObjectStream a
+stream_remember objeto variavel = undefined -}
