@@ -4,57 +4,60 @@ data ObjectStream a = EmptyStream | Object a | Stream (ObjectStream a) (ObjectSt
 
 {-
 	EXEMPLOS DE USO:
-	* Criando um Stream:
-		let x = EmptyStream															"Stream Vazia"
-		let y = Stream (Object "object1") EmptyStream								"Stream com um objeto"
-		let z = Stream (Object "object1") (Stream (Object "object2") EmptyStream)	"Stream com dois objetos"
+	* Criando Streams:
+		"Stream Vazia"			let x = EmptyStream
+		"Stream com 1 obj"		let y = Stream (Object "object1") EmptyStream
+		"Stream com 2 obj"		let z = Stream (Object "object1") (Stream (Object "object2") EmptyStream)
 -}
 
-stream_endp :: ObjectStream a -> Bool
-stream_endp EmptyStream = True
-stream_endp (Stream _ _) = False
+streamEndp :: ObjectStream a -> Bool
+streamEndp EmptyStream = True
+streamEndp (Stream _ _) = False
 
-stream_first :: ObjectStream a -> ObjectStream a
-stream_first (Stream first _) = first
+streamFirst :: ObjectStream a -> ObjectStream a
+streamFirst (Stream first _) = first
 
-stream_rest :: ObjectStream a -> ObjectStream a
-stream_rest (Stream _ rest) = rest
+streamRestp :: ObjectStream a -> ObjectStream a
+streamRestp (Stream _ rest) = rest
 
-stream_cons :: ObjectStream a -> ObjectStream a -> ObjectStream a
-stream_cons objeto stm = (Stream objeto stm)
+streamCons :: ObjectStream a -> ObjectStream a -> ObjectStream a
+streamCons objeto stm = (Stream objeto stm)
 
-stream_append :: ObjectStream a -> ObjectStream a -> ObjectStream a
-stream_append stm1 stm2 =
-	if (stream_endp stm1) then stm2 
-	else stream_cons (stream_first stm1) (stream_append (stream_rest stm1) stm2)
+streamAppend :: ObjectStream a -> ObjectStream a -> ObjectStream a
+streamAppend stm1 stm2 =
+	if (streamEndp stm1) then stm2 
+	else streamCons (streamFirst stm1) (streamAppend (streamRestp stm1) stm2)
 
-stream_concatenate :: ObjectStream a -> ObjectStream a
-stream_concatenate streams
-	| stream_endp streams = EmptyStream
-	| stream_endp (stream_first streams) = stream_concatenate (stream_rest streams)
-	| otherwise = stream_cons (stream_first (stream_first streams)) 
-								(stream_concatenate (stream_cons (stream_rest (stream_first streams))
-													(stream_rest streams)))
+streamConcatenate :: ObjectStream a -> ObjectStream a
+streamConcatenate streams
+	| streamEndp streams = EmptyStream
+	| streamEndp (streamFirst streams) = streamConcatenate (streamRestp streams)
+	| otherwise = streamCons (streamFirst (streamFirst streams)) 
+								(streamConcatenate (streamCons (streamRestp (streamFirst streams))
+													(streamRestp streams)))
 
-stream_transform :: (ObjectStream a -> ObjectStream a) -> ObjectStream a -> ObjectStream a
-stream_transform procedure stream =
-	if (stream_endp stream) then EmptyStream
-	else stream_cons (procedure (stream_first stream))
-						(stream_transform (procedure) (stream_rest stream))
+streamTranform :: (ObjectStream a -> ObjectStream a) -> ObjectStream a -> ObjectStream a
+streamTranform procedure stream =
+	if (streamEndp stream) then EmptyStream
+	else streamCons (procedure (streamFirst stream))
+						(streamTranform (procedure) (streamRestp stream))
 
-stream_member :: (Eq a) => ObjectStream a -> ObjectStream a -> Bool
-stream_member objeto stream
-	| stream_endp stream = False
-	| objeto == (stream_first stream) = True
-	| otherwise = stream_member objeto (stream_rest stream)
+streamMember :: (Eq a) => ObjectStream a -> ObjectStream a -> Bool
+streamMember objeto stream
+	| streamEndp stream = False
+	| objeto == (streamFirst stream) = True
+	| otherwise = streamMember objeto (streamRestp stream)
 
-{-stream_remember :: ObjectStream a -> ObjectStream a -> ObjectStream a
-stream_remember objeto variavel = undefined-}
+streamRemember :: ObjectStream a -> ObjectStream a -> ObjectStream a
+streamRemember objeto variavel = undefined
 
---Esta funcao foi criada para testar stream_transform
+
+{-------------------------------------------------------------------------------}
+
+--Esta funcao foi criada para testar streamTranform
 tira_primeira_letra :: ObjectStream String -> ObjectStream String
 tira_primeira_letra (Object (h:t)) = (Object t)
 
---Funcao criada para testar stream_transform como exemplo do livro
+--Funcao criada para testar streamTranform como exemplo do livro
 potencia_de_dois :: ObjectStream Integer -> ObjectStream Integer
 potencia_de_dois (Object num) = (Object (2^num))
