@@ -36,11 +36,11 @@ streamConcatenate streams
 								(streamConcatenate (streamCons (streamRestp (streamFirst streams))
 													(streamRestp streams)))
 
-streamTranform :: (ObjectStream a -> ObjectStream a) -> ObjectStream a -> ObjectStream a
-streamTranform procedure stream =
+streamTransform :: (ObjectStream a -> ObjectStream a) -> ObjectStream a -> ObjectStream a
+streamTransform procedure stream =
 	if (streamEndp stream) then EmptyStream
 	else streamCons (procedure (streamFirst stream))
-						(streamTranform (procedure) (streamRestp stream))
+						(streamTransform (procedure) (streamRestp stream))
 
 streamMember :: (Eq a) => ObjectStream a -> ObjectStream a -> Bool
 streamMember objeto stream
@@ -56,10 +56,10 @@ streamRemember objeto variavel =
 
 {-------------------------------------------------------------------------------}
 
---Esta funcao foi criada para testar streamTranform
+--Esta funcao foi criada para testar streamTransform
 tiraPrimeiraLetra :: ObjectStream String -> ObjectStream String
 tiraPrimeiraLetra (Object (h:t)) = (Object t)
 
---Funcao criada para testar streamTranform como exemplo do livro
+--Funcao criada para testar streamTransform como exemplo do livro
 potenciaDeDois :: ObjectStream Integer -> ObjectStream Integer
 potenciaDeDois (Object num) = (Object (2^num))
