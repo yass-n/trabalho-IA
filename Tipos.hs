@@ -5,7 +5,7 @@ module Tipos
 , Expressao(..)
 ) where
 
-data Expressao a = Atomo a | Variavel a | Seq (Expressao a) (Expressao a) deriving (Show, Eq, Read)
+data Expressao a = Atomo a | Variavel a | Seq (Expressao a) (Expressao a) | Ign deriving (Show, Eq, Read)
 
 type Ligacao a = (Expressao a, Expressao a)
 

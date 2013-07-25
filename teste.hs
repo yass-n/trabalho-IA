@@ -9,7 +9,7 @@ main = do
 
     let x = Variavel "x"
     let y = Variavel "y"
-    let underscore = Variavel "_"
+    let underscore = Ign
 
     let apple = Atomo "apple"
     let red = Atomo "red"

@@ -2,8 +2,8 @@ module Match where
 
 import Tipos
 
-match :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
-match (Variavel "_") _ ligacoes = Just ligacoes
+match :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Maybe ([Ligacao a])
+match Ign _ ligacoes = Just ligacoes
 
 match (Atomo p) (Atomo d) ligacoes = if p == d then Just ligacoes else Nothing
 
