@@ -11,7 +11,6 @@ import Data.Char
 -- (valor do tipo a) de um prefixo da string e o segundo elemento o sufixo da string.
 -- Para gramáticas ambíguas serão retornados vários resultados se o prefixo puder
 -- ser consumido de diferentes maneiras
-
 newtype Parser a = Parser (String -> [(a, String)])
 
 -- A função parse recebe um parser do tipo a e o retorna em forma de função
@@ -48,8 +47,8 @@ p1 +++ p2 = Parser (\cs -> case parse (p1 `mplus` p2) cs of
 -- retorna como resultado, se a string for vazia o parser falha (retorna [])
 item :: Parser Char
 item =  Parser (\cs -> case cs of
-                            "" -> []
-                            (c:cs) -> [(c, cs)])
+                        "" -> []
+                        (c:cs) -> [(c, cs)])
 
 -- Semelhante ao item, executa com sucesso se o caractere extraído satisfaz
 -- o predicado p
@@ -83,13 +82,15 @@ token p = do {a <- p; space; return a}
 symb :: String -> Parser String
 symb cs = token (string cs)
 
+-- Um atomo é uma sequencia de letras e numeros e o separador '-'
 tokAtom :: Parser String
-tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'z'] ++ ['0'..'9'])
+tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0'..'9'])
 
 {-
    Gramática
    =========
-   expr := "(" expr ")" expr | atomo expr | variavel expr | nada
+   expr := "(" expr ")" expr | atom expr | variavel expr | ign expr | vazio
+   ign  := "_"
    var  := "?" idf
    idf  := a | b | ... | z
    atom := [A-Za-z0-9] ++ ['-']
@@ -99,16 +100,17 @@ expr :: Parser (Expressao String)
 expr =  do {symb "("; e <- expr; symb ")"; es <- expr; return (Seq e es)}
     +++ do {a <- atom; e <- expr; return (Seq a e)}
     +++ do {v <- var; e <- expr; return (Seq v e)}
+    +++ do {i <- ign; e <- expr; return (Seq i e)}
     +++ do {symb "("; e <- expr; symb ")"; return e}
     +++ do {atom}
     +++ do {var}
+    +++ do {ign}
 
 atom :: Parser (Expressao String)
 atom = do {a <- tokAtom; if a == "" then mzero else return (Atomo a)}
 
 var :: Parser (Expressao String)
-var = do {symb "?"; v <- token (sat isAlpha); return (Variavel (v:""))}
+var = do {symb "?"; v <- token $ sat isAlpha; return (Variavel (v:""))}
 
--- parse expr "(patrick is_a person) with (hair blond)"
--- parse expr "(?x is_a person) with (hair ?y)"
--- deve unificar
+ign :: Parser (Expressao String)
+ign = do {token $ string "_"; return Ign}
