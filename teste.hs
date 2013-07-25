@@ -22,15 +22,14 @@ main = do
     let patrick = Atomo "patrick"
     let blond = Atomo "blond"
 
-    --let p1 = color `Seq` x `Seq` red
-    let p1 = Seq (Seq color x) red
-    let p2 = color `Seq` apple `Seq` red
-    let p3 = color `Seq` apple `Seq`  y
-    let p4 = color `Seq` x `Seq` y
-    let p5 = color `Seq` underscore `Seq`  red
-    let p6 = color `Seq` underscore `Seq`  underscore
-    let p7 = color `Seq` apple `Seq`  orange
-    let p8 = color `Seq` x `Seq` x
+    let p1 = Seq color (Seq x red)
+    let p2 = Seq color (Seq apple red)
+    let p3 = Seq color (Seq apple y)
+    let p4 = Seq color (Seq x y)
+    let p5 = Seq color (Seq underscore red)
+    let p6 = Seq color (Seq underscore underscore)
+    let p7 = Seq color (Seq apple orange)
+    let p8 = Seq color (Seq x x)
     let p9 = Seq (Seq x (Seq is_a person)) (Seq with (Seq hair y))
     let p10 = Seq (Seq patrick (Seq is_a person)) (Seq with (Seq hair blond))
 
@@ -49,16 +48,14 @@ main = do
 
     putStrLn "teste do unify"
 
-    -- x `Seq` (with `Seq` (hair `Seq` blond))
     let p11 =  Seq x (Seq with (Seq hair blond))
-    -- (patrick `Seq` is_a `Seq` person) `Seq` (with `Seq` (hair `Seq` blond))
-    let p12 = Seq (Seq (Seq patrick is_a) person) (Seq with (Seq hair blond))
+    let p12 = p10
 
-    let p13 = Seq (Seq (Seq patrick is_a) y) (Seq with (Seq hair blond))
-    let p14 = Seq (Seq (Seq patrick is_a) x) (Seq with (Seq hair blond))
+    let p13 = Seq (Seq patrick (Seq is_a y)) (Seq with (Seq hair blond))
+    let p14 = Seq (Seq patrick (Seq is_a x)) (Seq with (Seq hair blond))
 
-    let t10 = unify p11 p12 [] == Just [(x, Seq (Seq patrick is_a) person)]
-    let t11 = unify p11 p13 [] == Just [(x, Seq (Seq patrick is_a) y)]
+    let t10 = unify p11 p12 [] == Just [(x, Seq patrick (Seq is_a person))]
+    let t11 = unify p11 p13 [] == Just [(x, Seq patrick (Seq is_a y))]
     let t12 = unify p11 p14 [] == Nothing
 
     mapM_ testa [t10, t11, t12]
