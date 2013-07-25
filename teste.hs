@@ -2,6 +2,7 @@ import Tipos
 import Match
 import Unify
 import Stream
+import Parser
 
 main:: IO ()
 main = do
@@ -115,6 +116,42 @@ main = do
     let t21 = status2 == NIL
 
     mapM_ testa [t13, t14, t15, t16, t17, t18, t19]
+
+    putStrLn "teste do parser"
+
+
+    let (s1,_):_  = parse expr "color ?x red"
+    let (s2,_):_  = parse expr "color apple red"
+    let (s3,_):_  = parse expr "color apple ?y"
+    let (s4,_):_  = parse expr "color ?x ?y"
+    let (s5,_):_  = parse expr "color _ red"
+    let (s6,_):_  = parse expr "color _ _"
+    let (s7,_):_  = parse expr "color apple orange"
+    let (s8,_):_  = parse expr "color ?x ?x"
+    let (s9,_):_  = parse expr "(?x is-a person) with (hair ?y)"
+    let (s10,_):_ = parse expr "(patrick is-a person) with (hair blond)"
+    let (s11,_):_ = parse expr "?x with (hair blond)"
+    let s12 = s10
+    let (s13,_):_ = parse expr "(patrick is-a ?y) with (hair blond)"
+    let (s14,_):_ = parse expr "(patrick is-a ?x) with (hair blond)"
+
+    let t22 = s1 == p1
+    let t23 = s2 == p2
+    let t24 = s3 == p3
+    let t25 = s4 == p4
+    let t26 = s5 == p5
+    let t27 = s6 == p6
+    let t28 = s7 == p7
+    let t29 = s8 == p8
+    let t30 = s9 == p9
+
+    let t31 = s10 == p10
+    let t32 = s11 == p11
+    let t33 = s12 == p12
+    let t34 = s13 == p13
+    let t35 = s14 == p14
+
+    mapM_ testa [t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35]
 
 testa :: Bool -> IO ()
 testa t = do
