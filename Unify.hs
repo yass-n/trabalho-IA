@@ -2,8 +2,8 @@ module Unify where
 
 import Tipos
 
-unify :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
-unify (Variavel "_") _ ligacoes = Just ligacoes
+unify :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Maybe ([Ligacao a])
+unify Ign _ ligacoes = Just ligacoes
 
 unify (Atomo p) (Seq _ _) _ = Nothing
 
@@ -16,7 +16,7 @@ unify p (Variavel d) ligacoes = unifyVariable (Variavel d) p ligacoes
 unify (Seq firstP restP) (Seq firstD restD) ligacoes =
 	unify firstP firstD ligacoes >>= unify restP restD
 
-unifyVariable :: Expressao String -> Expressao String -> [Ligacao String] -> Maybe ([Ligacao String])
+unifyVariable :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Maybe ([Ligacao a])
 unifyVariable (Variavel p) d ligacoes =
 	case axaLigacao (Variavel p) ligacoes of
 		Just (p, b) -> unify b d ligacoes

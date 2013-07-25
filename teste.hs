@@ -2,6 +2,7 @@ import Tipos
 import Match
 import Unify
 import Stream
+import Parser
 
 main:: IO ()
 main = do
@@ -9,7 +10,7 @@ main = do
 
     let x = Variavel "x"
     let y = Variavel "y"
-    let underscore = Variavel "_"
+    let underscore = Ign
 
     let apple = Atomo "apple"
     let red = Atomo "red"
@@ -22,15 +23,14 @@ main = do
     let patrick = Atomo "patrick"
     let blond = Atomo "blond"
 
-    --let p1 = color `Seq` x `Seq` red
-    let p1 = Seq (Seq color x) red
-    let p2 = color `Seq` apple `Seq` red
-    let p3 = color `Seq` apple `Seq`  y
-    let p4 = color `Seq` x `Seq` y
-    let p5 = color `Seq` underscore `Seq`  red
-    let p6 = color `Seq` underscore `Seq`  underscore
-    let p7 = color `Seq` apple `Seq`  orange
-    let p8 = color `Seq` x `Seq` x
+    let p1 = Seq color (Seq x red)
+    let p2 = Seq color (Seq apple red)
+    let p3 = Seq color (Seq apple y)
+    let p4 = Seq color (Seq x y)
+    let p5 = Seq color (Seq underscore red)
+    let p6 = Seq color (Seq underscore underscore)
+    let p7 = Seq color (Seq apple orange)
+    let p8 = Seq color (Seq x x)
     let p9 = Seq (Seq x (Seq is_a person)) (Seq with (Seq hair y))
     let p10 = Seq (Seq patrick (Seq is_a person)) (Seq with (Seq hair blond))
 
@@ -49,16 +49,14 @@ main = do
 
     putStrLn "teste do unify"
 
-    -- x `Seq` (with `Seq` (hair `Seq` blond))
     let p11 =  Seq x (Seq with (Seq hair blond))
-    -- (patrick `Seq` is_a `Seq` person) `Seq` (with `Seq` (hair `Seq` blond))
-    let p12 = Seq (Seq (Seq patrick is_a) person) (Seq with (Seq hair blond))
+    let p12 = p10
 
-    let p13 = Seq (Seq (Seq patrick is_a) y) (Seq with (Seq hair blond))
-    let p14 = Seq (Seq (Seq patrick is_a) x) (Seq with (Seq hair blond))
+    let p13 = Seq (Seq patrick (Seq is_a y)) (Seq with (Seq hair blond))
+    let p14 = Seq (Seq patrick (Seq is_a x)) (Seq with (Seq hair blond))
 
-    let t10 = unify p11 p12 [] == Just [(x, Seq (Seq patrick is_a) person)]
-    let t11 = unify p11 p13 [] == Just [(x, Seq (Seq patrick is_a) y)]
+    let t10 = unify p11 p12 [] == Just [(x, Seq patrick (Seq is_a person))]
+    let t11 = unify p11 p13 [] == Just [(x, Seq patrick (Seq is_a y))]
     let t12 = unify p11 p14 [] == Nothing
 
     mapM_ testa [t10, t11, t12]
@@ -118,6 +116,42 @@ main = do
     let t21 = status2 == NIL
 
     mapM_ testa [t13, t14, t15, t16, t17, t18, t19]
+
+    putStrLn "teste do parser"
+
+
+    let (s1,_):_  = parse expr "color ?x red"
+    let (s2,_):_  = parse expr "color apple red"
+    let (s3,_):_  = parse expr "color apple ?y"
+    let (s4,_):_  = parse expr "color ?x ?y"
+    let (s5,_):_  = parse expr "color _ red"
+    let (s6,_):_  = parse expr "color _ _"
+    let (s7,_):_  = parse expr "color apple orange"
+    let (s8,_):_  = parse expr "color ?x ?x"
+    let (s9,_):_  = parse expr "(?x is-a person) with (hair ?y)"
+    let (s10,_):_ = parse expr "(patrick is-a person) with (hair blond)"
+    let (s11,_):_ = parse expr "?x with (hair blond)"
+    let s12 = s10
+    let (s13,_):_ = parse expr "(patrick is-a ?y) with (hair blond)"
+    let (s14,_):_ = parse expr "(patrick is-a ?x) with (hair blond)"
+
+    let t22 = s1 == p1
+    let t23 = s2 == p2
+    let t24 = s3 == p3
+    let t25 = s4 == p4
+    let t26 = s5 == p5
+    let t27 = s6 == p6
+    let t28 = s7 == p7
+    let t29 = s8 == p8
+    let t30 = s9 == p9
+
+    let t31 = s10 == p10
+    let t32 = s11 == p11
+    let t33 = s12 == p12
+    let t34 = s13 == p13
+    let t35 = s14 == p14
+
+    mapM_ testa [t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35]
 
 testa :: Bool -> IO ()
 testa t = do
