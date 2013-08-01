@@ -64,13 +64,13 @@ main = do
     putStrLn "teste do stream"
 
     -- Stream com três objectos ilustrado na pagina 368 do livro cap. 25
-    let stream = Stream (Object "object1") (Stream (Object "object2") (Stream (Object "object3") EmptyStream))
-    
+    let stream = Stream "object1" (Stream "object2" (Stream "object3" EmptyStream))
+
     -- Streams de exemplo nas paginas 369 e 370 criada com stream-cons
-    let stream1 = streamCons (Object "object_a") (streamCons (Object "object_b") EmptyStream)
-    let stream2 = streamCons (Object "object_x") (streamCons (Object "object_y") EmptyStream)
+    let stream1 = streamCons "object_a" (streamCons "object_b" EmptyStream)
+    let stream2 = streamCons "object_x" (streamCons "object_y" EmptyStream)
     let stream_of_streams = streamCons stream1 (streamCons stream2 EmptyStream)
-    let number_stream = streamCons (Object 2) (streamCons (Object 3) EmptyStream)
+    let number_stream = streamCons 2 (streamCons 3 EmptyStream)
 
     -- Teste das funcoes basicas
     let first = streamFirst stream
@@ -87,32 +87,32 @@ main = do
     let streamC = streamTransform potenciaDeDois number_stream
 
     -- Teste stream-member
-    let isMember = streamMember (Object "object_x") streamB
+    let isMember = streamMember "object_x" streamB
 
     -- Teste stream-remember ilustradas na pagina 370
     let long_stream = streamB
 
-    let aux = streamRemember (Object "last_object") long_stream
+    let aux = streamRemember "last_object" long_stream
     let long_stream = aux
     let status1 = long_stream
 
-    let aux = streamRemember (Object "last_object") long_stream
+    let aux = streamRemember "last_object" long_stream
     let long_stream = aux
     let status2 = long_stream
 
     -- Testando
-    let t13 = first == (Object "object1")
-    let t14 = rest == (Stream (Object "object2") (Stream (Object "object3") EmptyStream))
+    let t13 = first == "object1"
+    let t14 = rest == (Stream "object2" (Stream "object3" EmptyStream))
     let t15 = isEnd
-    let t16 = streamA == (Stream (Object "object_a") (Stream (Object "object_b") (Stream (Object "object_x") 
-                            (Stream (Object "object_y") EmptyStream))))
-    let t17 = stream_of_streams == (Stream (Stream (Object "object_a") (Stream (Object "object_b") EmptyStream)) 
-                                        (Stream (Stream (Object "object_x") 
-                                            (Stream (Object "object_y") EmptyStream)) EmptyStream))
+    let t16 = streamA == (Stream "object_a" (Stream "object_b" (Stream "object_x"
+                            (Stream "object_y" EmptyStream))))
+    let t17 = stream_of_streams == (Stream (Stream "object_a" (Stream "object_b" EmptyStream))
+                                        (Stream (Stream "object_x"
+                                            (Stream "object_y" EmptyStream)) EmptyStream))
     let t18 = streamB == streamA
-    let t19 = streamC == (Stream (Object 4) (Stream (Object 8) EmptyStream))
-    let t20 = status1 == (Stream (Object "object_a") (Stream (Object "object_b") (Stream (Object "object_x") 
-                            (Stream (Object "object_y") (Stream (Object "last_object") EmptyStream)))))
+    let t19 = streamC == (Stream 4 (Stream 8 EmptyStream))
+    let t20 = status1 == (Stream "object_a" (Stream "object_b" (Stream "object_x"
+                            (Stream "object_y" (Stream "last_object" EmptyStream)))))
     let t21 = status2 == NIL
 
     mapM_ testa [t13, t14, t15, t16, t17, t18, t19]
