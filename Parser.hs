@@ -97,7 +97,7 @@ tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0
 -}
 
 expr :: Parser (Expressao String)
-expr =  do { symb "(";  e <- expr; symb ")"; es <- expr; return (Seq e es )}
+expr =  do { symb "(";  e <- expr; symb ")"; es <- expr; return (Seq e es) }
     +++ do { a <- atom; e <- expr;                       return (Seq a e) }
     +++ do { v <- var;  e <- expr;                       return (Seq v e) }
     +++ do { i <- ign;  e <- expr;                       return (Seq i e) }
