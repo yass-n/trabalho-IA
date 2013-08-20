@@ -3,6 +3,8 @@ import Match
 import Unify
 import Stream
 import Parser
+import Expert
+import Control.Monad.State
 
 main:: IO ()
 main = do
@@ -119,7 +121,6 @@ main = do
 
     putStrLn "teste do parser"
 
-
     let (s1,_):_  = parse expr "color ?x red"
     let (s2,_):_  = parse expr "color apple red"
     let (s3,_):_  = parse expr "color apple ?y"
@@ -152,6 +153,43 @@ main = do
     let t35 = s14 == p14
 
     mapM_ testa [t22, t23, t24, t25, t26, t27, t28, t29, t30, t31, t32, t33, t34, t35]
+
+    putStrLn "Teste do expert"
+
+
+    let e str = ex where (ex,_):_ = parse expr str
+
+    let animalIsASpecies = e "(? animal) is a (? species)"
+    let animalIsAParent  = e "(? animal) is a parent of (? child)"
+    let childIsASpecies  = e "(? child) is a (? species)"
+    let deedeeIsAParent  = e "deedee is a parent of sugar"
+    let deedeeIsAParent2 = e "deedee is a parent of brassy"
+    let bozoIsADog = e "bozo is a dog"
+    let deedeeIsAHorse = e "deedee is a horse"
+
+    let try1 = tryAssertion animalIsASpecies bozoIsADog []
+
+    let try2 = tryAssertion animalIsAParent deedeeIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]
+
+    let try3 = tryAssertion animalIsASpecies deedeeIsAHorse []
+
+    let try4 = tryAssertion animalIsAParent deedeeIsAParent [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")]
+
+
+    let t36 = try1 == Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] EmptyStream
+    let t37 = try2 == EmptyStream
+    let t38 = try3 == Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream
+    let t39 = try4 == Stream [(Variavel "child", Atomo "sugar"), (Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream
+
+    let assertions = Stream bozoIsADog (Stream deedeeIsAHorse (Stream deedeeIsAParent (Stream deedeeIsAParent2 EmptyStream)))
+    let rules = Stream (Rule "identify" [animalIsASpecies, animalIsAParent] childIsASpecies) EmptyStream
+    let kb = Kb assertions rules
+
+    let t40 = runState (matchPatternToAssertions animalIsASpecies []) kb
+
+    putStrLn $ show $ fst t40
+
+    mapM_ testa [t36, t37, t38, t39]
 
 testa :: Bool -> IO ()
 testa t = do
