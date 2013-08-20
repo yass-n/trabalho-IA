@@ -110,7 +110,7 @@ atom :: Parser (Expressao String)
 atom = do {a <- tokAtom; if a == "" then mzero else return (Atomo a)}
 
 var :: Parser (Expressao String)
-var = do {symb "?"; v <- token $ sat isAlpha;       return (Variavel (v:""))}
+var = do {symb "?"; v <- tokAtom;                   return (Variavel v)}
 
 ign :: Parser (Expressao String)
 ign = do {token $ string "_";                       return Ign}
