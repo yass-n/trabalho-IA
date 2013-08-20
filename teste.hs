@@ -187,11 +187,13 @@ main = do
 
     let matchPTA1 = runState (matchPatternToAssertions animalIsASpecies []) kb
     let matchPTA2 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]) kb
+    let matchPTA3 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")]) kb
 
     let t40 = matchPTA1 == (Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream), kb)
     let t41 = matchPTA2 == (EmptyStream, kb)
+    let t42 = matchPTA3 == (Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream), kb)
 
-    mapM_ testa [t36, t37, t38, t39, t40, t41]
+    mapM_ testa [t36, t37, t38, t39, t40, t41, t42]
 
 testa :: Bool -> IO ()
 testa t = do
