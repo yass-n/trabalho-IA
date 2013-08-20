@@ -185,11 +185,13 @@ main = do
     let rules = Stream (Rule "identify" [animalIsASpecies, animalIsAParent] childIsASpecies) EmptyStream
     let kb = Kb assertions rules
 
-    let t40 = runState (matchPatternToAssertions animalIsASpecies []) kb
+    let matchPTA1 = runState (matchPatternToAssertions animalIsASpecies []) kb
+    let matchPTA2 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]) kb
 
-    putStrLn $ show $ fst t40
+    let t40 = matchPTA1 == (Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream), kb)
+    let t41 = matchPTA2 == (EmptyStream, kb)
 
-    mapM_ testa [t36, t37, t38, t39]
+    mapM_ testa [t36, t37, t38, t39, t40, t41]
 
 testa :: Bool -> IO ()
 testa t = do

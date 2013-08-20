@@ -8,13 +8,13 @@ import Stream
 data Rule a = Rule { rName :: String
                    , rIfs  :: [Expressao a]
                    , rThen :: Expressao a
-                   } deriving (Show)
+                   } deriving (Eq, Show)
 
 -- | A base de conhecimento do sistema especialista. Uma Stream de afirmações e
 -- | uma Stream de regras.
 data Kb a = Kb { assertions :: ObjectStream (Expressao a)
                , rules      :: ObjectStream (Rule a)
-               } deriving (Show)
+               } deriving (Eq, Show)
 
 -- | Tenta casar um padrão a uma afirmação dada uma lista de ligações/associações.
 -- | Se houver casamento retorna Stream com um elemento (a lista de associações
