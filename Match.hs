@@ -16,3 +16,5 @@ match (Variavel p) d ligacoes =
 
 match (Seq firstP restP) (Seq firstD restD) ligacoes =
     match firstP firstD ligacoes >>=  match restP restD
+
+match (Seq _ _) d _ = Nothing
