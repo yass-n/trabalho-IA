@@ -10,14 +10,38 @@ data Rule a = Rule { rName :: String
                    , rThen :: Expressao a
                    } deriving (Eq, Show)
 
--- | A base de conhecimento do sistema especialista. Uma Stream de afirmações e
--- | uma Stream de regras.
+-- | A base de conhecimento do sistema especialista. Stream de afirmações e
+-- | Stream de regras.
 
 data Kb a = Kb { assertions :: ObjectStream (Expressao a)
                , rules      :: ObjectStream (Rule a)
                } deriving (Eq, Show)
 
--- | Tenta casar um padrão a uma afirmação dada uma lista de ligações/associações.
+-- | Tenta adicionar uma nova afirmação a base de conhecimento
+
+rememberAssertion :: (Eq a) => Expressao a -> State (Kb a) Bool
+rememberAssertion a = do
+    Kb as rs <- get
+    let as' = streamRemember a as
+    if as' == NIL
+        then return False
+        else do
+            put $ Kb as' rs
+            return True
+
+-- | Tenta adicionar uma nova regra a base de conhecimento
+
+rememberRule :: (Eq a) => Rule a -> State (Kb a) Bool
+rememberRule r = do
+    Kb as rs <- get
+    let rs' = streamRemember r rs
+    if rs' == NIL
+        then return False   -- indica que a regra não foi adicionada
+        else do
+            put $ Kb as rs' -- altera o estado, alterando Stream de Rules da Kb
+            return True     -- indica que a regra foi adicionada
+
+-- | Tenta casar um padrão a uma afirmação dada uma lista de ligações / associações.
 -- | Se houver casamento retorna Stream com um elemento (a lista de associações
 -- | resultante), se não retorna EmptyStream.
 
@@ -57,6 +81,34 @@ filterBindingStream p stream = do
 -- | Aplica filterBindingStream a cada padrão numa lista de padrões
 
 applyFilters :: (Eq a) =>
-                ObjectStream (Expressao a)
+                [Expressao a]
                 -> ObjectStream [Ligacao a] -> State (Kb a) (ObjectStream [Ligacao a])
-applyFilters = undefined
+applyFilters [] stream = do return stream
+applyFilters (h:t) stream = do
+    kb <- get
+    applyFilters t $ evalState (filterBindingStream h stream) kb
+
+-- | Instancia a parte consequente de uma regra de acordo com a lista de associações
+
+instantiateVariables :: (Eq a) => Expressao a -> [Ligacao a] -> Expressao a
+instantiateVariables a@(Atomo p) _ = a
+
+instantiateVariables v@(Variavel a) bs =
+    case axaLigacao v bs of
+        Just (x, y) -> y
+      --Nothing -> pau!
+
+instantiateVariables (Seq first rest) bs =
+    Seq (instantiateVariables first bs) (instantiateVariables rest bs)
+
+
+-- | ! Ainda não foi terminado
+-- | Executa applyFilters em cada um dos antecedentes da regra, depois adiciona
+-- | os consequentes instanciados a stream de afirmações da base de conhecimento
+
+useRule :: (Eq a) => Rule a -> State (Kb a) Bool
+useRule r = do
+    kb <- get
+    let bindingStream = evalState (applyFilters (rIfs r) $ Stream [] EmptyStream) kb
+    return True
+

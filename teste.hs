@@ -5,6 +5,7 @@ import Stream
 import Parser
 import Expert
 import Control.Monad.State
+import System.Exit
 
 main:: IO ()
 main = do
@@ -182,7 +183,8 @@ main = do
     let t39 = try4 == Stream [(Variavel "child", Atomo "sugar"), (Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream
 
     let assertions = Stream bozoIsADog (Stream deedeeIsAHorse (Stream deedeeIsAParent (Stream deedeeIsAParent2 EmptyStream)))
-    let rules = Stream (Rule "identify" [animalIsASpecies, animalIsAParent] childIsASpecies) EmptyStream
+    let identify = Rule "identify" [animalIsASpecies, animalIsAParent] childIsASpecies
+    let rules = Stream (identify) EmptyStream
     let kb = Kb assertions rules
 
     let matchPTA1 = runState (matchPatternToAssertions animalIsASpecies []) kb
@@ -196,6 +198,30 @@ main = do
     let filterBs2 = runState (filterBindingStream animalIsAParent bs1) kb
     let filterBs3 = runState (filterBindingStream animalIsASpecies (Stream [] EmptyStream) >>= filterBindingStream animalIsAParent) kb
 
+    let b1 = [(Variavel "species", Atomo "horse"),(Variavel "child", Atomo "sugar"),(Variavel "animal", Atomo "deedee")]
+    let b2 = [(Variavel "species", Atomo "horse"),(Variavel "child", Atomo "brassy"),(Variavel "animal", Atomo "deedee")]
+    let bs3 = Stream b1 (Stream b2 EmptyStream)
+
+    let patterns = [animalIsAParent, animalIsASpecies]
+    let applyFlt1 = runState (applyFilters patterns (Stream [] EmptyStream)) kb
+
+    let inst1 = Seq (Atomo "sugar") (Seq (Atomo "is") (Seq (Atomo "a") (Atomo "horse")))
+    let inst2 = Seq (Atomo "brassy") (Seq (Atomo "is") (Seq (Atomo "a") (Atomo "horse")))
+    let instanVr1 = instantiateVariables childIsASpecies b1
+    let instanVr2 = instantiateVariables childIsASpecies b2
+
+    let kb2 = Kb EmptyStream $ EmptyStream
+    let rmbAssrt1 = runState (rememberAssertion bozoIsADog >>
+                               rememberAssertion deedeeIsAHorse >>
+                               rememberAssertion deedeeIsAParent >>
+                               rememberAssertion deedeeIsAParent2) kb2
+
+    let rmbAssrt2 = runState (rememberAssertion bozoIsADog >>
+                               rememberAssertion bozoIsADog) kb2
+
+    let rmbRules1 = runState (rememberRule identify) kb2
+    let rmbRules2 = runState (rememberRule identify >> rememberRule identify) kb2
+
     let t40 = matchPTA1 == (Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream), kb)
     let t41 = matchPTA2 == (EmptyStream, kb)
     let t42 = matchPTA3 == (Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream), kb)
@@ -204,9 +230,19 @@ main = do
     let t44 = filterBs2 == (bs2, kb)
     let t45 = filterBs3 == (bs2, kb)
 
-    mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45]
+    let t46 = applyFlt1 == (bs3, kb)
+
+    let t47 = instanVr1 == inst1
+    let t48 = instanVr2 == inst2
+    let t49 = rmbAssrt1 == (True, Kb assertions EmptyStream)
+    let t50 = rmbAssrt2 == (False, Kb (Stream bozoIsADog EmptyStream) EmptyStream)
+    let t51 = rmbRules1 == (True, Kb EmptyStream rules)
+    let t52 = rmbRules2 == (False, Kb EmptyStream rules)
+
+    mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50, t51, t52]
 
 testa :: Bool -> IO ()
 testa t = do
     if t then putStrLn " OK"
-         else putStrLn " Fail"
+         else do putStrLn " Fail"
+                 exitFailure
