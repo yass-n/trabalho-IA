@@ -189,11 +189,22 @@ main = do
     let matchPTA2 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]) kb
     let matchPTA3 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")]) kb
 
+    let bs1 = Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream)
+    let bs2 = Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream)
+
+    let filterBs1 = runState (filterBindingStream animalIsASpecies (Stream [] EmptyStream)) kb
+    let filterBs2 = runState (filterBindingStream animalIsAParent bs1) kb
+    let filterBs3 = runState (filterBindingStream animalIsASpecies (Stream [] EmptyStream) >>= filterBindingStream animalIsAParent) kb
+
     let t40 = matchPTA1 == (Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream), kb)
     let t41 = matchPTA2 == (EmptyStream, kb)
     let t42 = matchPTA3 == (Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream), kb)
 
-    mapM_ testa [t36, t37, t38, t39, t40, t41, t42]
+    let t43 = filterBs1 == (bs1, kb)
+    let t44 = filterBs2 == (bs2, kb)
+    let t45 = filterBs3 == (bs2, kb)
+
+    mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45]
 
 testa :: Bool -> IO ()
 testa t = do
