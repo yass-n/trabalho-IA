@@ -165,66 +165,137 @@ main = do
     let childIsASpecies  = e "(? child) is a (? species)"
     let deedeeIsAParent  = e "deedee is a parent of sugar"
     let deedeeIsAParent2 = e "deedee is a parent of brassy"
-    let bozoIsADog = e "bozo is a dog"
-    let deedeeIsAHorse = e "deedee is a horse"
+    let bozoIsADog       = e "bozo is a dog"
+    let deedeeIsAHorse   = e "deedee is a horse"
 
-    let try1 = tryAssertion animalIsASpecies bozoIsADog []
+    let try1 = tryAssertion (e "(? animal) is a (? species)")
+                            (e "bozo is a dog") []
 
-    let try2 = tryAssertion animalIsAParent deedeeIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]
+    let try2 = tryAssertion (e "(? animal) is a parent of (? child)")
+                            (e "deedee is a parent of sugar")
+                           [(e "? species", e "dog"), (e "? animal",  e "bozo")]
 
-    let try3 = tryAssertion animalIsASpecies deedeeIsAHorse []
+    let try3 = tryAssertion (e "(? animal) is a (? species)")
+                            (e "deedee is a horse") []
 
-    let try4 = tryAssertion animalIsAParent deedeeIsAParent [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")]
+    let try4 = tryAssertion (e "(? animal) is a parent of (? child)")
+                            (e "deedee is a parent of sugar")
+                           [(e "? species", e "horse"), (e "? animal",  e "deedee")]
 
 
-    let t36 = try1 == Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] EmptyStream
+    let t36 = try1 == Stream
+                        [(e "? species", e "dog"),
+                         (e "? animal",  e "bozo")] EmptyStream
     let t37 = try2 == EmptyStream
-    let t38 = try3 == Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream
-    let t39 = try4 == Stream [(Variavel "child", Atomo "sugar"), (Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream
+    let t38 = try3 == Stream [(e "? species", e "horse"),
+                              (e "? animal",  e "deedee")] EmptyStream
 
-    let assertions = Stream bozoIsADog (Stream deedeeIsAHorse (Stream deedeeIsAParent (Stream deedeeIsAParent2 EmptyStream)))
-    let identify = Rule "identify" [animalIsASpecies, animalIsAParent] childIsASpecies
+    let t39 = try4 == Stream [(e "? child",   e "sugar"),
+                              (e "? species", e "horse"),
+                              (e "? animal",  e "deedee")] EmptyStream
+
+    let assertions = Stream (e "bozo is a dog")
+                        (Stream (e "deedee is a horse")
+                            (Stream (e "deedee is a parent of sugar")
+                                (Stream (e "deedee is a parent of brassy") EmptyStream)))
+
+    let identify = Rule "identify"
+                    [(e "(? animal) is a (? species)"),
+                     (e "(? animal) is a parent of (? child)")]
+                     (e "(? child) is a (? species)")
     let rules = Stream (identify) EmptyStream
     let kb = Kb assertions rules
 
-    let matchPTA1 = runState (matchPatternToAssertions animalIsASpecies []) kb
-    let matchPTA2 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")]) kb
-    let matchPTA3 = runState (matchPatternToAssertions animalIsAParent [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")]) kb
+    let matchPTA1 = runState
+                        (matchPatternToAssertions
+                            (e "(? animal) is a (? species)") []) kb
 
-    let bs1 = Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream)
-    let bs2 = Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream)
+    let matchPTA2 = runState
+                        (matchPatternToAssertions
+                            (e "(? animal) is a parent of (? child)")
+                            [(e "? species", e "dog"),
+                             (e "? animal",  e "bozo")]) kb
 
-    let filterBs1 = runState (filterBindingStream animalIsASpecies (Stream [] EmptyStream)) kb
-    let filterBs2 = runState (filterBindingStream animalIsAParent bs1) kb
-    let filterBs3 = runState (filterBindingStream animalIsASpecies (Stream [] EmptyStream) >>= filterBindingStream animalIsAParent) kb
+    let matchPTA3 = runState (
+                        matchPatternToAssertions
+                            (e "(? animal) is a parent of (? child)")
+                            [(e "? species", e "horse"),
+                             (e "? animal", e "deedee")]) kb
 
-    let b1 = [(Variavel "species", Atomo "horse"),(Variavel "child", Atomo "sugar"),(Variavel "animal", Atomo "deedee")]
-    let b2 = [(Variavel "species", Atomo "horse"),(Variavel "child", Atomo "brassy"),(Variavel "animal", Atomo "deedee")]
+    let bs1 = Stream
+                [(e "? species", e "dog"),
+                 (e "? animal",  e "bozo")]
+                (Stream [(e "? species", e "horse"),
+                         (e "? animal",  e "deedee")] EmptyStream)
+
+    let bs2 = Stream
+                [(e "? child", e "sugar"),
+                 (e "? species", e "horse"),
+                 (e "? animal", e "deedee")]
+                (Stream [(e "? child", e "brassy"),
+                         (e "? species", e "horse"),
+                         (e "? animal", e "deedee")] EmptyStream)
+
+    let filterBs1 = runState
+                        (filterBindingStream
+                            (e "(? animal) is a (? species)") (Stream [] EmptyStream)) kb
+    let filterBs2 = runState
+                        (filterBindingStream
+                            (e "(? animal) is a parent of (? child)") bs1) kb
+
+    let filterBs3 = runState
+                        (filterBindingStream
+                            (e "(? animal) is a (? species)") (Stream [] EmptyStream) >>=
+                        filterBindingStream
+                            (e "(? animal) is a parent of (? child)")) kb
+
+    let b1 = [(e "? species", e "horse"),
+              (e "? child",   e "sugar"),
+              (e "? animal",  e "deedee")]
+
+    let b2 = [(e "? species", e "horse"),
+              (e "? child",   e "brassy"),
+              (e "? animal",  e "deedee")]
+
     let bs3 = Stream b1 (Stream b2 EmptyStream)
 
-    let patterns = [animalIsAParent, animalIsASpecies]
+    let patterns = [(e "(? animal) is a parent of (? child)"),
+                    (e "(? animal) is a (? species)")]
+
     let applyFlt1 = runState (applyFilters patterns (Stream [] EmptyStream)) kb
 
-    let inst1 = Seq (Atomo "sugar") (Seq (Atomo "is") (Seq (Atomo "a") (Atomo "horse")))
-    let inst2 = Seq (Atomo "brassy") (Seq (Atomo "is") (Seq (Atomo "a") (Atomo "horse")))
-    let instanVr1 = instantiateVariables childIsASpecies b1
-    let instanVr2 = instantiateVariables childIsASpecies b2
+    let inst1 = (e "sugar is a horse")
+    let inst2 = (e "brassy is a horse")
+
+    let instanVr1 = instantiateVariables (e "(? child) is a (? species)") b1
+    let instanVr2 = instantiateVariables (e "(? child) is a (? species)") b2
 
     let kb2 = Kb EmptyStream $ EmptyStream
-    let rmbAssrt1 = runState (rememberAssertion bozoIsADog >>
-                               rememberAssertion deedeeIsAHorse >>
-                               rememberAssertion deedeeIsAParent >>
-                               rememberAssertion deedeeIsAParent2) kb2
+    let rmbAssrt1 = runState (rememberAssertion  (e "bozo is a dog") >>
+                               rememberAssertion (e "deedee is a horse") >>
+                               rememberAssertion (e "deedee is a parent of sugar") >>
+                               rememberAssertion (e "deedee is a parent of brassy")) kb2
 
-    let rmbAssrt2 = runState (rememberAssertion bozoIsADog >>
-                               rememberAssertion bozoIsADog) kb2
+    let rmbAssrt2 = runState (rememberAssertion (e "bozo is a dog") >>
+                              rememberAssertion (e "bozo is a dog")) kb2
 
     let rmbRules1 = runState (rememberRule identify) kb2
     let rmbRules2 = runState (rememberRule identify >> rememberRule identify) kb2
 
-    let t40 = matchPTA1 == (Stream [(Variavel "species", Atomo "dog"), (Variavel "animal", Atomo "bozo")] (Stream [(Variavel "species", Atomo "horse"), (Variavel "animal", Atomo "deedee")] EmptyStream), kb)
+    let t40 = matchPTA1 == (Stream
+                                [(e "? species", e "dog"),
+                                 (e "? animal", e "bozo")]
+                                (Stream [(e "? species", e "horse"),
+                                         (e "? animal",  e "deedee")] EmptyStream), kb)
+
     let t41 = matchPTA2 == (EmptyStream, kb)
-    let t42 = matchPTA3 == (Stream [(Variavel "child", Atomo "sugar"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] (Stream [(Variavel "child", Atomo "brassy"),(Variavel "species", Atomo "horse"),(Variavel "animal", Atomo "deedee")] EmptyStream), kb)
+    let t42 = matchPTA3 == (Stream
+                                [(e "? child",  e "sugar"),
+                                (e "? species", e "horse"),
+                                (e "? animal",  e "deedee")]
+                                (Stream [(e "? child",   e "brassy"),
+                                         (e "? species", e "horse"),
+                                         (e "? animal",  e "deedee")] EmptyStream), kb)
 
     let t43 = filterBs1 == (bs1, kb)
     let t44 = filterBs2 == (bs2, kb)
@@ -235,7 +306,7 @@ main = do
     let t47 = instanVr1 == inst1
     let t48 = instanVr2 == inst2
     let t49 = rmbAssrt1 == (True, Kb assertions EmptyStream)
-    let t50 = rmbAssrt2 == (False, Kb (Stream bozoIsADog EmptyStream) EmptyStream)
+    let t50 = rmbAssrt2 == (False, Kb (Stream (e "bozo is a dog") EmptyStream) EmptyStream)
     let t51 = rmbRules1 == (True, Kb EmptyStream rules)
     let t52 = rmbRules2 == (False, Kb EmptyStream rules)
 
