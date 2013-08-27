@@ -51,7 +51,7 @@ streamMember objeto stream
 streamRemember :: (Eq a) => a -> ObjectStream a -> ObjectStream a
 streamRemember objeto stream =
 	if not (streamMember objeto stream) then streamAppend stream (streamCons objeto EmptyStream)
-	else NIL
+	else EmptyStream
 
 
 {-------------------------------------------------------------------------------}

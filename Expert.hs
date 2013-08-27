@@ -11,7 +11,7 @@ data Rule a = Rule { rName :: String
                    } deriving (Eq, Show)
 
 -- | A base de conhecimento do sistema especialista. Stream de afirmações e
--- | Stream de regras.
+-- Stream de regras.
 
 data Kb a = Kb { assertions :: ObjectStream (Expressao a)
                , rules      :: ObjectStream (Rule a)
@@ -22,28 +22,25 @@ data Kb a = Kb { assertions :: ObjectStream (Expressao a)
 rememberAssertion :: (Eq a) => Expressao a -> State (Kb a) Bool
 rememberAssertion a = do
     Kb as rs <- get
-    let as' = streamRemember a as
-    if as' == NIL
-        then return False
-        else do
-            put $ Kb as' rs
-            return True
+    case streamRemember a as of
+        EmptyStream -> return False
+        as'         -> do { put $ Kb as' rs; return True }
 
 -- | Tenta adicionar uma nova regra a base de conhecimento
 
 rememberRule :: (Eq a) => Rule a -> State (Kb a) Bool
 rememberRule r = do
     Kb as rs <- get
-    let rs' = streamRemember r rs
-    if rs' == NIL
-        then return False   -- indica que a regra não foi adicionada
-        else do
-            put $ Kb as rs' -- altera o estado, alterando Stream de Rules da Kb
-            return True     -- indica que a regra foi adicionada
+    case streamRemember r rs of
+        -- indica que a regra não foi adicionada
+        EmptyStream -> return False
+        -- altera o estado, alterando Stream de Rules da Kb
+        -- indica que a regra foi adicionada
+        rs'         -> do { put $ Kb as rs'; return True }
 
 -- | Tenta casar um padrão a uma afirmação dada uma lista de ligações / associações.
--- | Se houver casamento retorna Stream com um elemento (a lista de associações
--- | resultante), se não retorna EmptyStream.
+-- Se houver casamento retorna Stream com um elemento (a lista de associações
+-- resultante), se não retorna EmptyStream.
 
 tryAssertion :: (Eq a) =>
                 Expressao a
@@ -57,7 +54,7 @@ cat' = streamConcatenate
 map' = streamTransform
 
 -- | Casa um padrão com todas as afirmações na lista de afirmações do expert.
--- | Seta como resultado do State Stream de ligações resultantes do tryAssertion
+-- Seta como resultado do State Stream de ligações resultantes do tryAssertion
 
 matchPatternToAssertions :: (Eq a) =>
                             Expressao a
@@ -67,8 +64,8 @@ matchPatternToAssertions p bs = do
     return $ cat' $ map' (\a -> tryAssertion p a bs) as
 
 -- | Aplica matchPatternToAssertions para cada associação da stream de associações
--- | Como matchPatternToAssertions não modifica o estado, podemos usar o estado
--- | passado para função
+-- Como matchPatternToAssertions não modifica o estado, podemos usar o estado
+-- passado para função
 
 filterBindingStream :: (Eq a) =>
                        Expressao a
@@ -103,8 +100,8 @@ instantiateVariables (Seq first rest) bs =
 
 
 -- | ! Ainda não foi terminado
--- | Executa applyFilters em cada um dos antecedentes da regra, depois adiciona
--- | os consequentes instanciados a stream de afirmações da base de conhecimento
+-- Executa applyFilters em cada um dos antecedentes da regra, depois adiciona
+-- os consequentes instanciados a stream de afirmações da base de conhecimento
 
 useRule :: (Eq a) => Rule a -> State (Kb a) Bool
 useRule r = do
