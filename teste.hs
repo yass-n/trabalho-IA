@@ -5,6 +5,7 @@ import Stream
 import Parser
 import Expert
 import Control.Monad.State
+import Data.Maybe
 import System.Exit
 
 main:: IO ()
@@ -43,8 +44,8 @@ main = do
     let t4 = match p2 p2 [] == Just []
     let t5 = match p5 p2 [] == Just []
     let t6 = match p6 p2 [] == Just []
-    let t7 = match p7 p2 [] == Nothing
-    let t8 = match p8 p2 [] == Nothing
+    let t7 = isNothing $ match p7 p2 []
+    let t8 = isNothing $ match p8 p2 []
     let t9 = match p9 p10 [] == Just [(y, blond), (x, patrick)]
 
 
@@ -60,7 +61,7 @@ main = do
 
     let t10 = unify p11 p12 [] == Just [(x, Seq patrick (Seq is_a person))]
     let t11 = unify p11 p13 [] == Just [(x, Seq patrick (Seq is_a y))]
-    let t12 = unify p11 p14 [] == Nothing
+    let t12 = isNothing $ unify p11 p14 []
 
     mapM_ testa [t10, t11, t12]
 
@@ -105,17 +106,26 @@ main = do
 
     -- Testando
     let t13 = first == "object1"
-    let t14 = rest == (Stream "object2" (Stream "object3" EmptyStream))
+    let t14 = rest == Stream "object2" (Stream "object3" EmptyStream)
     let t15 = isEnd
-    let t16 = streamA == (Stream "object_a" (Stream "object_b" (Stream "object_x"
-                            (Stream "object_y" EmptyStream))))
-    let t17 = stream_of_streams == (Stream (Stream "object_a" (Stream "object_b" EmptyStream))
+    let t16 = streamA == Stream "object_a"
+                            (Stream "object_b"
+                                (Stream "object_x"
+                                    (Stream "object_y" EmptyStream)))
+
+    let t17 = stream_of_streams == Stream
+                                        (Stream "object_a"
+                                            (Stream "object_b" EmptyStream))
                                         (Stream (Stream "object_x"
-                                            (Stream "object_y" EmptyStream)) EmptyStream))
+                                            (Stream "object_y" EmptyStream))
+                                        EmptyStream)
     let t18 = streamB == streamA
-    let t19 = streamC == (Stream 4 (Stream 8 EmptyStream))
-    let t20 = status1 == (Stream "object_a" (Stream "object_b" (Stream "object_x"
-                            (Stream "object_y" (Stream "last_object" EmptyStream)))))
+    let t19 = streamC == Stream 4 (Stream 8 EmptyStream)
+    let t20 = status1 == Stream "object_a"
+                            (Stream "object_b"
+                                (Stream "object_x"
+                                    (Stream "object_y"
+                                        (Stream "last_object" EmptyStream))))
     let t21 = status2 == NIL
 
     mapM_ testa [t13, t14, t15, t16, t17, t18, t19]
@@ -160,6 +170,8 @@ main = do
 
     let e str = ex where (ex,_):_ = parse expr str
 
+    --fn :: Parser a -> a -> Expressao a
+
     let animalIsASpecies = e "(? animal) is a (? species)"
     let animalIsAParent  = e "(? animal) is a parent of (? child)"
     let childIsASpecies  = e "(? child) is a (? species)"
@@ -200,10 +212,10 @@ main = do
                                 (Stream (e "deedee is a parent of brassy") EmptyStream)))
 
     let identify = Rule "identify"
-                    [(e "(? animal) is a (? species)"),
-                     (e "(? animal) is a parent of (? child)")]
-                     (e "(? child) is a (? species)")
-    let rules = Stream (identify) EmptyStream
+                    [e "(? animal) is a (? species)",
+                     e "(? animal) is a parent of (? child)"]
+                    (e "(? child)  is a (? species)")
+    let rules = Stream identify EmptyStream
     let kb = Kb assertions rules
 
     let matchPTA1 = runState
@@ -232,9 +244,9 @@ main = do
                 [(e "? child", e "sugar"),
                  (e "? species", e "horse"),
                  (e "? animal", e "deedee")]
-                (Stream [(e "? child", e "brassy"),
+                (Stream [(e "? child",   e "brassy"),
                          (e "? species", e "horse"),
-                         (e "? animal", e "deedee")] EmptyStream)
+                         (e "? animal",  e "deedee")] EmptyStream)
 
     let filterBs1 = runState
                         (filterBindingStream
@@ -259,8 +271,8 @@ main = do
 
     let bs3 = Stream b1 (Stream b2 EmptyStream)
 
-    let patterns = [(e "(? animal) is a parent of (? child)"),
-                    (e "(? animal) is a (? species)")]
+    let patterns = [e "(? animal) is a parent of (? child)",
+                    e "(? animal) is a (? species)"]
 
     let applyFlt1 = runState (applyFilters patterns (Stream [] EmptyStream)) kb
 
@@ -270,7 +282,7 @@ main = do
     let instanVr1 = instantiateVariables (e "(? child) is a (? species)") b1
     let instanVr2 = instantiateVariables (e "(? child) is a (? species)") b2
 
-    let kb2 = Kb EmptyStream $ EmptyStream
+    let kb2 = Kb EmptyStream EmptyStream
     let rmbAssrt1 = runState (rememberAssertion  (e "bozo is a dog") >>
                                rememberAssertion (e "deedee is a horse") >>
                                rememberAssertion (e "deedee is a parent of sugar") >>
@@ -284,15 +296,15 @@ main = do
 
     let t40 = matchPTA1 == (Stream
                                 [(e "? species", e "dog"),
-                                 (e "? animal", e "bozo")]
+                                 (e "? animal",  e "bozo")]
                                 (Stream [(e "? species", e "horse"),
                                          (e "? animal",  e "deedee")] EmptyStream), kb)
 
     let t41 = matchPTA2 == (EmptyStream, kb)
     let t42 = matchPTA3 == (Stream
-                                [(e "? child",  e "sugar"),
-                                (e "? species", e "horse"),
-                                (e "? animal",  e "deedee")]
+                                [(e "? child",   e "sugar"),
+                                 (e "? species", e "horse"),
+                                 (e "? animal",  e "deedee")]
                                 (Stream [(e "? child",   e "brassy"),
                                          (e "? species", e "horse"),
                                          (e "? animal",  e "deedee")] EmptyStream), kb)
@@ -313,7 +325,7 @@ main = do
     mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50, t51, t52]
 
 testa :: Bool -> IO ()
-testa t = do
+testa t =
     if t then putStrLn " OK"
          else do putStrLn " Fail"
                  exitFailure
