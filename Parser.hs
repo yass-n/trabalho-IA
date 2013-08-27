@@ -90,10 +90,10 @@ tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0
    Gramática
    =========
    expr := "(" expr ")" expr | atom expr | variavel expr | ign expr | vazio
-   ign  := "_"
+   atom := [A-Za-z0-9] ++ ['-']
    var  := "?" idf
    idf  := a | b | ... | z
-   atom := [A-Za-z0-9] ++ ['-']
+   ign  := "_"
 -}
 
 expr :: Parser (Expressao String)
@@ -102,9 +102,9 @@ expr =  do { symb "(";  e <- expr; symb ")"; es <- expr; return (Seq e es) }
     +++ do { v <- var;  e <- expr;                       return (Seq v e) }
     +++ do { i <- ign;  e <- expr;                       return (Seq i e) }
     +++ do { symb "(";  e <- expr; symb ")";             return e }
-    +++ do { atom }
-    +++ do { var }
-    +++ do { ign }
+    +++ atom
+    +++ var
+    +++ ign
 
 atom :: Parser (Expressao String)
 atom = do {a <- tokAtom; if a == "" then mzero else return (Atomo a)}
