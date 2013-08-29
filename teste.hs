@@ -294,6 +294,15 @@ main = do
     let rmbRules1 = runState (rememberRule identify) kb2
     let rmbRules2 = runState (rememberRule identify >> rememberRule identify) kb2
 
+    let assertions2 = Stream (e "bozo is a dog")
+                        (Stream (e "deedee is a horse")
+                            (Stream (e "deedee is a parent of sugar")
+                                (Stream (e "deedee is a parent of brassy")
+                                    (Stream (e "sugar is a horse")
+                                        (Stream (e "brassy is a horse") EmptyStream)))))
+
+    let useRule1 = runStateT (useRule identify) kb
+
     let t40 = matchPTA1 == (Stream
                                 [(e "? species", e "dog"),
                                  (e "? animal",  e "bozo")]
@@ -322,7 +331,18 @@ main = do
     let t51 = rmbRules1 == (True, Kb EmptyStream rules)
     let t52 = rmbRules2 == (False, Kb EmptyStream rules)
 
+    let t53 = do
+        (bool, state) <- useRule1
+        if (bool, state) == (True, Kb assertions2 rules)
+            then putStrLn " OK"
+            else do putStrLn " Fail"
+                    exitFailure
+
+    --print useRule1
+
     mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50, t51, t52]
+
+    t53
 
 testa :: Bool -> IO ()
 testa t =

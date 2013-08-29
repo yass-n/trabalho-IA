@@ -99,13 +99,23 @@ instantiateVariables (Seq first rest) bs =
     Seq (instantiateVariables first bs) (instantiateVariables rest bs)
 
 
--- | ! Ainda não foi terminado
--- Executa applyFilters em cada um dos antecedentes da regra, depois adiciona
+-- | Executa applyFilters em cada um dos antecedentes da regra, depois adiciona
 -- os consequentes instanciados a stream de afirmações da base de conhecimento
 
-useRule :: (Eq a) => Rule a -> State (Kb a) Bool
+useRule :: (Eq a, Show a) => Rule a -> StateT (Kb a) IO Bool
 useRule r = do
     kb <- get
     let bindingStream = evalState (applyFilters (rIfs r) $ Stream [] EmptyStream) kb
-    return True
-
+    loop r bindingStream False
+    where
+      loop r (Stream b rest) switch = do
+          let result = instantiateVariables (rThen r) b
+          kb <- get
+          let (bool, newKb) = runState (rememberAssertion result) kb
+          if bool
+              then do
+                put newKb
+                liftIO $ putStrLn $ "Rule " ++ rName r ++ " indicates " ++ show result
+                loop r rest True
+              else loop r rest switch
+      loop r EmptyStream switch = return switch
