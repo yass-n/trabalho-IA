@@ -109,11 +109,29 @@ useRule r = do
       loop r (Stream b rest) switch = do
           let result = instantiateVariables (rThen r) b
           kb <- get
-          let (bool, newKb) = runState (rememberAssertion result) kb
-          if bool
+          let (remembered, newKb) = runState (rememberAssertion result) kb
+          if remembered
               then do
                 put newKb
                 liftIO $ putStrLn $ "Rule " ++ rName r ++ " indicates " ++ show result
                 loop r rest True
-              else loop r rest switch
+              else
+                loop r rest switch
       loop r EmptyStream switch = return switch
+
+forwardChain :: (Eq a, Show a) => StateT (Kb a) IO ()
+forwardChain = do
+    Kb as rs <- get
+    loop rs
+    where
+      loop (Stream r rest) = do
+        newAssertion <- useRule r
+        if newAssertion
+          then do
+            liftIO $ putStrLn "I am trying the rules again."
+            forwardChain
+          else do
+            liftIO $ putStrLn "Nothing new noted."
+            loop rest
+
+      loop EmptyStream = return ()
