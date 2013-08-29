@@ -81,9 +81,7 @@ applyFilters :: (Eq a) =>
                 [Expressao a]
                 -> ObjectStream [Ligacao a] -> State (Kb a) (ObjectStream [Ligacao a])
 applyFilters [] stream = return stream
-applyFilters (h:t) stream = do
-    kb <- get
-    applyFilters t $ evalState (filterBindingStream h stream) kb
+applyFilters (h:t) stream = filterBindingStream h stream >>= applyFilters t
 
 -- | Instancia a parte consequente de uma regra de acordo com a lista de associações
 
