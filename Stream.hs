@@ -1,6 +1,6 @@
 module Stream where
 
-data ObjectStream a = EmptyStream | Stream a (ObjectStream a) | NIL deriving (Show, Read, Eq)
+data ObjectStream a = EmptyStream | Stream a (ObjectStream a) deriving (Show, Read, Eq)
 
 {-
 	EXEMPLOS DE USO:
