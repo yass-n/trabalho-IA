@@ -84,16 +84,16 @@ symb cs = token (string cs)
 
 -- Um atomo é uma sequencia de letras e numeros e o separador '-'
 tokAtom :: Parser String
-tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0'..'9'])
+tokAtom = token $ many1 $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0'..'9'])
 
 {-
-   Gramática
-   =========
-   expr := "(" expr ")" expr | atom expr | variavel expr | ign expr | vazio
-   atom := [A-Za-z0-9] ++ ['-']
-   var  := "?" idf
-   idf  := a | b | ... | z
-   ign  := "_"
+    Expressões
+    ==========
+    expr := "(" expr ")" expr | atom expr | variavel expr | ign expr | vazio
+    atom := [A-Za-z0-9] ++ ['-']
+    var  := "?" idf
+    idf  := a | b | ... | z
+    ign  := "_"
 -}
 
 expr :: Parser (Expressao String)
@@ -117,3 +117,20 @@ var = do { symb "?"; v <- tokAtom;                   return (Variavel v) }
 
 ign :: Parser (Expressao String)
 ign = do { token $ string "_";                       return Ign }
+
+{-
+    Regras
+    ======
+    rule = name ifs ">" then
+    name = atom
+    ifs  = ('expr)⁺
+    then = expr
+-}
+
+rule :: Parser (Rule String)
+rule = do
+    name <- tokAtom
+    rIfs <- many1 (do { string "'"; expr })
+    symb ">"
+    rThen <- expr
+    return (Rule name rIfs rThen)
