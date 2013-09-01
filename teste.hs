@@ -126,7 +126,7 @@ main = do
                                 (Stream "object_x"
                                     (Stream "object_y"
                                         (Stream "last_object" EmptyStream))))
-    let t21 = status2 == NIL
+    let t21 = status2 == EmptyStream
 
     mapM_ testa [t13, t14, t15, t16, t17, t18, t19]
 
@@ -338,11 +338,13 @@ main = do
             else do putStrLn " Fail"
                     exitFailure
 
-    --print useRule1
-
     mapM_ testa [t36, t37, t38, t39, t40, t41, t42, t43, t44, t45, t46, t47, t48, t49, t50, t51, t52]
 
     t53
+
+    runStateT forwardChain kb
+
+    return ()
 
 testa :: Bool -> IO ()
 testa t =
