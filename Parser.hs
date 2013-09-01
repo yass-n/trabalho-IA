@@ -15,7 +15,7 @@ newtype Parser a = Parser (String -> [(a, String)])
 
 -- A função parse recebe um parser do tipo a e o retorna em forma de função
 -- (extrai a função do parser)
-parse :: Parser a -> (String -> [(a, String)])
+parse :: Parser a -> String -> [(a, String)]
 parse (Parser p) = p
 
 -- Um Monad é uma abstração que representa uma computação.
@@ -33,7 +33,7 @@ instance Monad Parser where
 -- MonadPlus permite representar uma computação que não teve sucesso (mzero) e
 -- juntar duas computações (mplus)
 instance MonadPlus Parser where
-    mzero = Parser (\cs -> [])
+    mzero = Parser $ const []
     p1 `mplus` p2 = Parser (\cs -> parse p1 cs ++ parse p2 cs)
 
 -- O operador (+++) retorna o resultado do primeiro parser se não houver erros,
@@ -97,20 +97,23 @@ tokAtom = token $ many $ sat (\c -> c `elem` '-':['A'..'Z'] ++ ['a'..'z'] ++ ['0
 -}
 
 expr :: Parser (Expressao String)
-expr =  do { symb "(";  e <- expr; symb ")"; es <- expr; return (Seq e es) }
-    +++ do { a <- atom; e <- expr;                       return (Seq a e) }
-    +++ do { v <- var;  e <- expr;                       return (Seq v e) }
-    +++ do { i <- ign;  e <- expr;                       return (Seq i e) }
-    +++ do { symb "(";  e <- expr; symb ")";             return e }
+expr =  do { e <- expr'; es <- expr; return (Seq e es) }
+    +++ do { a <- atom; e <- expr;   return (Seq a e) }
+    +++ do { v <- var;  e <- expr;   return (Seq v e) }
+    +++ do { i <- ign;  e <- expr;   return (Seq i e) }
+    +++ expr'
     +++ atom
     +++ var
     +++ ign
 
+expr' :: Parser (Expressao String)
+expr' = do { symb "(";  e <- expr; symb ")";         return e }
+
 atom :: Parser (Expressao String)
-atom = do {a <- tokAtom; if a == "" then mzero else return (Atomo a)}
+atom = do { a <- tokAtom; if a == "" then mzero else return (Atomo a) }
 
 var :: Parser (Expressao String)
-var = do {symb "?"; v <- tokAtom;                   return (Variavel v)}
+var = do { symb "?"; v <- tokAtom;                   return (Variavel v) }
 
 ign :: Parser (Expressao String)
-ign = do {token $ string "_";                       return Ign}
+ign = do { token $ string "_";                       return Ign }

@@ -19,6 +19,6 @@ axaLigacao a [] = Nothing
 axaLigacao a ((b,c):t) = if a == b then Just (b,c) else axaLigacao a t
 
 instance (Show a) => Show (Expressao a) where
-    show (Variavel a) = "?" ++ show a
+    show (Variavel a) = '?' : show a
     show (Atomo a) = show a
     show (Seq e es) = show e ++ " " ++ show es
