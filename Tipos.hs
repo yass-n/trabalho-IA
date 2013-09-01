@@ -3,9 +3,15 @@ module Tipos
 , addLigacao
 , Ligacao
 , Expressao(..)
+, Rule(..)
 ) where
 
 data Expressao a = Atomo a | Variavel a | Seq (Expressao a) (Expressao a) | Ign deriving (Eq, Read)
+
+data Rule a = Rule { rName :: String
+                   , rIfs  :: [Expressao a]
+                   , rThen :: Expressao a
+                   } deriving (Eq, Show)
 
 type Ligacao a = (Expressao a, Expressao a)
 

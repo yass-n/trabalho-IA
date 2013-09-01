@@ -5,11 +5,6 @@ import Tipos
 import Match
 import Stream
 
-data Rule a = Rule { rName :: String
-                   , rIfs  :: [Expressao a]
-                   , rThen :: Expressao a
-                   } deriving (Eq, Show)
-
 -- | A base de conhecimento do sistema especialista. Stream de afirmações e
 -- Stream de regras.
 
