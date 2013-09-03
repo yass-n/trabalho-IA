@@ -16,8 +16,6 @@ main = do
 
 	--var. utilizadas pra construir as regras
 	let pessoa1PrefAtributo1 = e "(? pessoa1) prefere (? atributo1)"
-	let pessoa2PrefAtributo2 = e "(? pessoa2) prefere (? atributo2)"
-	let pessoa1TemAtributo2 = e "(? pessoa1) tem (? atributo2)"
 	let pessoa2TemAtributo1 = e "(? pessoa2) tem (? atributo1)"
 
 	let pessoa1GostarPessoa2 = e "(? pessoa1) pode gostar de (? pessoa2)"
@@ -31,6 +29,7 @@ main = do
 
 	let pessoa1ehSexo2 = e "(? pessoa1) eh (? sexo2)"
 	let pessoa2ehSexo1 = e "(? pessoa2) eh (? sexo1)"
+
 	let pessoa1NamorarPessoa2 = e "(? pessoa1) pode namorar (? pessoa2)"
 
 	--var. utilizadas pra construir afirmacoes
@@ -59,17 +58,15 @@ main = do
 
 	let regra1 = Rule "preferencia1"
 				[pessoa1PrefAtributo1, 
-				pessoa2PrefAtributo2,
-				pessoa1TemAtributo2,
 				pessoa2TemAtributo1]
 				pessoa1GostarPessoa2
 
-	let regra2 = Rule "preferencia3"
+	let regra2 = Rule "preferencia2"
 				[pessoa1GostarPessoa2,
 				pessoa2GostarPessoa1]
 				pessoa1AmigoPessoa2
 
-	let regra3 = Rule "preferencia4"
+	let regra3 = Rule "preferencia3"
 				[pessoa1AmigoPessoa2,
 				pessoa2AmigoPessoa1,
 				pessoa1ProcuraSexo1,
@@ -106,6 +103,7 @@ main = do
 								(Stream joao EmptyStream))))
 
 	let assertion = streamConcatenate streams
+
 
 	let rules = (Stream regra1 
 					(Stream regra2 
