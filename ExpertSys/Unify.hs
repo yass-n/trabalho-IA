@@ -1,6 +1,6 @@
-module Unify where
+module ExpertSys.Unify where
 
-import Tipos
+import ExpertSys.Tipos
 
 unify :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Maybe ([Ligacao a])
 unify Ign _ ligacoes = Just ligacoes

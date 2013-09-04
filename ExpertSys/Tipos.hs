@@ -1,4 +1,4 @@
-module Tipos
+module ExpertSys.Tipos
 ( axaLigacao
 , addLigacao
 , Ligacao

@@ -1,9 +1,9 @@
-import Tipos
-import Match
-import Unify
-import Stream
-import Parser
-import Expert
+import ExpertSys.Tipos
+import ExpertSys.Match
+import ExpertSys.Unify
+import ExpertSys.Stream
+import ExpertSys.Parser
+import ExpertSys.Expert
 import Control.Monad.State
 import Data.Maybe
 import System.Exit
