@@ -1,12 +1,11 @@
-import Tipos
-import Match
-import Unify
-import Stream
-import Parser
-import Expert
+import ExpertSys.Tipos
+import ExpertSys.Match
+import ExpertSys.Unify
+import ExpertSys.Stream
+import ExpertSys.Parser
+import ExpertSys.Expert
 import Control.Monad.State
 import Data.Maybe
-import System.Exit
 
 main:: IO ()
 main = do
@@ -57,7 +56,7 @@ main = do
 	-- Regras
 
 	let regra1 = Rule "preferencia1"
-				[pessoa1PrefAtributo1, 
+				[pessoa1PrefAtributo1,
 				pessoa2TemAtributo1]
 				pessoa1GostarPessoa2
 
@@ -105,8 +104,8 @@ main = do
 	let assertion = streamConcatenate streams
 
 
-	let rules = (Stream regra1 
-					(Stream regra2 
+	let rules = (Stream regra1
+					(Stream regra2
 						(Stream regra3 EmptyStream)))
 
 	let kb = Kb assertion rules

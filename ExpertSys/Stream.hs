@@ -1,4 +1,4 @@
-module Stream where
+module ExpertSys.Stream where
 
 data ObjectStream a = EmptyStream | Stream a (ObjectStream a) deriving (Show, Read, Eq)
 

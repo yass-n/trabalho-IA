@@ -1,6 +1,6 @@
-module Match where
+module ExpertSys.Match where
 
-import Tipos
+import ExpertSys.Tipos
 
 match :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Maybe [Ligacao a]
 match Ign _ ligacoes = Just ligacoes

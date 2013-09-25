@@ -1,6 +1,6 @@
-module Parser where
+module ExpertSys.Parser where
 
-import Tipos
+import ExpertSys.Tipos
 import Control.Monad
 import Data.Char
 

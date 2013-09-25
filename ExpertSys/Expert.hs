@@ -1,9 +1,9 @@
-module Expert where
+module ExpertSys.Expert where
 
 import Control.Monad.State
-import Tipos
-import Match
-import Stream
+import ExpertSys.Tipos
+import ExpertSys.Match
+import ExpertSys.Stream
 
 -- | A base de conhecimento do sistema especialista. Stream de afirmações e
 -- Stream de regras.
