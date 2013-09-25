@@ -1,11 +1,17 @@
-module Tipos
+module ExpertSys.Tipos
 ( axaLigacao
 , addLigacao
 , Ligacao
 , Expressao(..)
+, Rule(..)
 ) where
 
 data Expressao a = Atomo a | Variavel a | Seq (Expressao a) (Expressao a) | Ign deriving (Eq, Read)
+
+data Rule a = Rule { rName :: String
+                   , rIfs  :: [Expressao a]
+                   , rThen :: Expressao a
+                   } deriving (Eq, Show)
 
 type Ligacao a = (Expressao a, Expressao a)
 
@@ -19,6 +25,7 @@ axaLigacao a [] = Nothing
 axaLigacao a ((b,c):t) = if a == b then Just (b,c) else axaLigacao a t
 
 instance (Show a) => Show (Expressao a) where
-    show (Variavel a) = "?" ++ show a
+    show Ign = "_"
+    show (Variavel a) = '?' : show a
     show (Atomo a) = show a
     show (Seq e es) = show e ++ " " ++ show es

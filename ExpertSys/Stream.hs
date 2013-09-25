@@ -1,6 +1,6 @@
-module Stream where
+module ExpertSys.Stream where
 
-data ObjectStream a = EmptyStream | Stream a (ObjectStream a) | NIL deriving (Show, Read, Eq)
+data ObjectStream a = EmptyStream | Stream a (ObjectStream a) deriving (Show, Read, Eq)
 
 {-
 	EXEMPLOS DE USO:
@@ -51,7 +51,7 @@ streamMember objeto stream
 streamRemember :: (Eq a) => a -> ObjectStream a -> ObjectStream a
 streamRemember objeto stream =
 	if not (streamMember objeto stream) then streamAppend stream (streamCons objeto EmptyStream)
-	else NIL
+	else EmptyStream
 
 
 {-------------------------------------------------------------------------------}
