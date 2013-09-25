@@ -1,3 +1,6 @@
+-- Parser monadico para expressões desenvolvido com base em:
+-- Functional Pearls, Monadic Parsing in Haskell http://www.cs.nott.ac.uk/~gmh/pearl.pdf
+
 module ExpertSys.Parser where
 
 import ExpertSys.Tipos
