@@ -25,7 +25,7 @@ unifyVariable (Variavel p) d ligacoes =
 
 
 insideP :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Bool
-insideP v e ls = if v == e then False else insideOrEqualP v e ls
+insideP v e ls = v /= e && insideOrEqualP v e ls
 
 insideOrEqualP :: (Eq a) => Expressao a -> Expressao a -> [Ligacao a] -> Bool
 insideOrEqualP (Variavel v1) (Variavel v2) _ = v1 == v2
